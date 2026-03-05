@@ -1,0 +1,69 @@
+---
+const categories = [
+  'Reusable?',
+  'Damages paper?',
+  'Requires a tool?',
+  'Recyclable?',
+  'Works as SIM ejector?',
+  'Looks good on a résumé?',
+];
+
+const products = [
+  { name: 'Paperclip', results: [true, false, false, true, true, true] },
+  { name: 'Tape', results: [false, true, true, false, false, false] },
+  { name: 'Staples', results: [false, true, true, false, false, false] },
+  { name: 'Binder Clip', results: [true, false, false, true, false, false] },
+];
+
+// For "Damages paper?" and "Requires a tool?", true = bad (✗ is good for paperclip)
+const invertedRows = [1, 2]; // indexes where false = good
+---
+
+<section class="py-20 px-6">
+  <div class="text-center mb-10">
+    <h2 class="font-heading text-2xl font-bold mb-2">The Competition</h2>
+    <p class="text-sm text-text-secondary italic">Spoiler: there isn't any.</p>
+  </div>
+
+  <div class="max-w-sm mx-auto overflow-x-auto">
+    <table class="w-full text-xs">
+      <thead>
+        <tr>
+          <th class="text-left py-2 pr-2 font-medium text-text-secondary"></th>
+          {products.map((p) => (
+            <th class:list={[
+              'py-2 px-2 font-heading font-semibold text-center',
+              p.name === 'Paperclip' ? 'text-accent' : 'text-text-secondary'
+            ]}>
+              {p.name}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {categories.map((cat, rowIndex) => (
+          <tr class:list={[
+            'border-t border-stone-200',
+            rowIndex >= 4 ? 'bg-accent/5' : ''
+          ]}>
+            <td class="py-3 pr-2 text-text-secondary font-medium">{cat}</td>
+            {products.map((p) => {
+              const val = p.results[rowIndex];
+              const isGood = invertedRows.includes(rowIndex) ? !val : val;
+              return (
+                <td class="py-3 px-2 text-center">
+                  <span class:list={[
+                    'inline-block w-5 h-5 leading-5 rounded-full text-xs font-bold',
+                    isGood ? 'bg-accent/10 text-accent' : 'bg-stone-100 text-stone-400'
+                  ]}>
+                    {isGood ? '✓' : '✗'}
+                  </span>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,17 +1,361 @@
 ---
+import Layout from "../layouts/Layout.astro";
+import SceneCanvas from "../components/SceneCanvas.astro";
+import ComparisonChart from "../components/ComparisonChart.astro";
+import Testimonials from "../components/Testimonials.svelte";
+import ProductConfig from "../components/ProductConfig.tsx";
+import Footer from "../components/Footer.astro";
 
+const facts = [
+    "Holds up to 50 sheets",
+    "Grade 304 stainless steel",
+    "Infinitely reusable",
+    "100% recyclable",
+    "No batteries required",
+];
+
+const uses = [
+    { icon: "📱", label: "SIM ejector" },
+    { icon: "🔓", label: "Lock pick (emergency)" },
+    { icon: "🔖", label: "Bookmark" },
+    { icon: "🔄", label: "Reset button poker" },
+    { icon: "🎨", label: "Mini sculpture" },
+    { icon: "💡", label: "Circuit tester" },
+];
+
+const specs = [
+    { label: "Material", value: "Grade 304 Stainless Steel" },
+    { label: "Finish", value: "Bright Polished / Matte" },
+    { label: "Gauge", value: "0.8mm wire" },
+    { label: "Capacity", value: "~50 sheets (80gsm)" },
+    { label: "Weight", value: "1.2g per unit" },
+    { label: "Dimensions", value: "33mm × 8mm" },
+];
+
+// Pre-generate paper sheet data for the red→white transition
+// seeded pseudo-random so it's deterministic across renders
+function seededRandom(seed: number) {
+    let s = seed;
+    return () => {
+        s = (s * 16807 + 0) % 2147483647;
+        return (s - 1) / 2147483646;
+    };
+}
+
+const SHEET_COUNT = 22;
+const rand = seededRandom(42);
+const sheets = Array.from({ length: SHEET_COUNT }, (_, i) => {
+    // Random start position far off-screen
+    const angle = rand() * Math.PI * 2;
+    const dist = 120 + rand() * 80; // 120–200% away
+    const startX = Math.cos(angle) * dist;
+    const startY = Math.sin(angle) * dist;
+    // Final resting position: cover viewport with overlap
+    const endX = (rand() - 0.5) * 30; // slight scatter ±15%
+    const endY = (rand() - 0.5) * 30;
+    const rotation = (rand() - 0.5) * 25; // ±12.5 degrees
+    // Stagger: earlier sheets arrive first
+    const delay = (i / SHEET_COUNT) * 0.6; // 0–0.6 of the scroll range
+    // Slightly varied paper tones
+    const lightness = 96 + rand() * 4; // 96–100%
+    const warmth = Math.round(rand() * 10); // 0–10 for warm tint
+    return { startX, startY, endX, endY, rotation, delay, lightness, warmth };
+});
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+    <SceneCanvas />
+
+    <!-- Fixed bottom product bar — appears after first 100vh -->
+    <div
+        id="product-bar"
+        class="w-full max-w-full fixed bottom-0 left-0 right-0 z-30 px-6 pb-6 pt-4 translate-y-full transition-transform duration-500 pointer-events-auto flex justify-center"
+    >
+        <ProductConfig client:load />
+    </div>
+
+    <!-- Bold red hero overlay — fixed, fades out on scroll -->
+    <div
+        id="hero-overlay"
+        class="fixed inset-0 z-0 flex items-center justify-center pointer-events-none"
+    >
+        <div class="text-center">
+            <h3
+                class="text-white font-heading text-xs tracking-[0.3em] uppercase mb-4"
+            >
+                ACME SUPPLY CO.
+            </h3>
+            <h1
+                id="hero-title"
+                class="hero-title leading-[0.85] text-white font-black uppercase"
+            >
+                <span class="block">Paper</span>
+                <span class="block">Clips</span>
+            </h1>
+        </div>
+    </div>
+
+    <!-- Paper sheets transition: fly in to cover red bg -->
+    <div
+        id="paper-transition"
+        class="fixed inset-0 z-0 pointer-events-none overflow-hidden"
+    >
+        {
+            sheets.map((s, i) => (
+                <div
+                    class="paper-sheet absolute"
+                    data-sx={s.startX}
+                    data-sy={s.startY}
+                    data-ex={s.endX}
+                    data-ey={s.endY}
+                    data-rot={s.rotation}
+                    data-delay={s.delay}
+                    style={`
+                    width: 140%;
+                    height: 140%;
+                    top: -20%;
+                    left: -20%;
+                    background: hsl(40, ${s.warmth}%, ${s.lightness}%);
+                    box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+                    transform: translate(${s.startX}vw, ${s.startY}vh) rotate(${s.rotation}deg);
+                `}
+                />
+            ))
+        }
+    </div>
+
+    <div id="scroll-spacer">
+        <!-- Hero: 0–15% -->
+        <section
+            class="scroll-section min-h-[200vh] flex items-center justify-center px-6"
+        >
+            <ul class="text-2xl text-black font-black uppercase list-none space-y-2 text-center">
+                <li class="reveal-text">It's a clip.</li>
+                <li class="reveal-text">It's a chain.</li>
+                <li class="reveal-text">It's a SIM ejector.</li>
+                <li class="reveal-text">It's a bookmark.</li>
+                <li class="reveal-text">It's a lock pick.</li>
+                <li class="reveal-text">It's a reset button poker.</li>
+                <li class="reveal-text">It's a zipper pull.</li>
+                <li class="reveal-text">It's a paperclip.</li>
+            </ul>
+        </section>
+
+        <!-- What's inside header: transition 15–30% -->
+        <section
+            class="scroll-section min-h-[100vh] flex items-center justify-center px-6"
+        >
+            <div class="text-center reveal-text">
+                <h2 class="font-heading text-2xl font-bold mb-2">
+                    What's inside?
+                </h2>
+                <p class="text-sm text-text-secondary">
+                    Watch the sheets slide on
+                </p>
+            </div>
+        </section>
+
+        <!-- Paper facts: 30–50% (sticky text) -->
+        <section class="scroll-section min-h-[350vh] relative px-6">
+            <div
+                class="sticky top-1/2 -translate-y-1/2 text-center sticky-fade"
+            >
+                <div class="space-y-4">
+                    {
+                        facts.map((fact) => (
+                            <div class="reveal-text">
+                                <div class="inline-block px-5 py-3 rounded-xl text-sm font-medium bg-surface">
+                                    {fact}
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Uses: 50–65% -->
+        <section
+            class="scroll-section min-h-[200vh] flex items-center justify-center px-6"
+        >
+            <div>
+                <div class="text-center mb-10 reveal-text">
+                    <h2 class="font-heading text-2xl font-bold mb-2">
+                        Other Uses
+                    </h2>
+                    <p class="text-sm text-text-secondary italic">
+                        Versatility wasn't the goal. It was inevitable.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                    {
+                        uses.map((use) => (
+                            <div class="bg-surface rounded-2xl p-5 text-center reveal-text">
+                                <div class="text-3xl mb-2">{use.icon}</div>
+                                <p class="text-sm font-medium">{use.label}</p>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison + Specs: 65–80% -->
+        <section
+            class="scroll-section min-h-[150vh] flex items-center justify-center"
+        >
+            <div class="reveal-text">
+                <ComparisonChart />
+            </div>
+        </section>
+
+        <section
+            class="scroll-section min-h-[200vh] flex items-center justify-center px-6"
+        >
+            <div class="max-w-sm mx-auto w-full">
+                <div class="text-center mb-10 reveal-text">
+                    <h2 class="font-heading text-2xl font-bold mb-2">Specs</h2>
+                    <p class="text-sm text-text-secondary italic">
+                        Engineered to perfection. Or close enough.
+                    </p>
+                </div>
+                {
+                    specs.map((spec) => (
+                        <div class="reveal-text flex justify-between items-baseline py-4 border-b border-stone-200">
+                            <span class="text-xs text-text-secondary uppercase tracking-wider font-medium">
+                                {spec.label}
+                            </span>
+                            <span class="text-sm font-heading font-semibold text-right">
+                                {spec.value}
+                            </span>
+                        </div>
+                    ))
+                }
+            </div>
+        </section>
+
+        <!-- Testimonials: independent carousel -->
+        <section
+            class="scroll-section min-h-[100vh] flex items-center justify-center"
+        >
+            <div class="w-full reveal-text">
+                <Testimonials client:visible />
+            </div>
+        </section>
+
+        <!-- Product config: 80–95% -->
+
+        <!-- CTA: 95–100% -->
+        <section
+            class="scroll-section min-h-[100vh] flex items-center justify-center px-6"
+        >
+            <div class="text-center reveal-text">
+                <h2 class="font-heading text-3xl font-bold mb-4">
+                    Ready to hold it together?
+                </h2>
+                <p class="text-text-secondary italic mb-8">
+                    Your papers are waiting.
+                </p>
+                <a
+                    href="#"
+                    class="inline-block px-8 py-4 rounded-2xl text-white font-semibold text-base transition-all duration-300 hover:scale-105 active:scale-[0.97]"
+                    style="background: #2563EB; font-family: Space Grotesk, sans-serif;"
+                >
+                    Shop Now
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <Footer />
+    </div>
+
+    <script>
+        const bar = document.getElementById("product-bar");
+        const overlay = document.getElementById("hero-overlay");
+        const paperContainer = document.getElementById("paper-transition");
+        const paperSheets =
+            document.querySelectorAll<HTMLElement>(".paper-sheet");
+        const body = document.body;
+
+        // Start with red background
+        body.style.background = "#dc2626";
+
+        // Clamp helper
+        function clamp01(v: number) {
+            return Math.max(0, Math.min(1, v));
+        }
+
+        // Smooth easing
+        function easeOutCubic(t: number) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function lerp(a: number, b: number, t: number) {
+            return a + (b - a) * t;
+        }
+
+        function onScroll() {
+            const scrollY = window.scrollY;
+            const vh = window.innerHeight;
+
+            // Product bar: show after 1vh
+            if (bar) {
+                const barVisible = scrollY > vh;
+                bar.classList.toggle("translate-y-full", !barVisible);
+                bar.classList.toggle("translate-y-0", barVisible);
+            }
+
+            // Hero overlay text: fade out over first 0.4vh
+            if (overlay) {
+                const fadeT = clamp01(scrollY / (vh * 0.4));
+                overlay.style.opacity = String(1 - fadeT);
+                if (fadeT >= 1) {
+                    overlay.style.display = "none";
+                } else {
+                    overlay.style.display = "";
+                }
+                const title = document.getElementById("hero-title");
+                if (title) {
+                    title.style.transform = `scale(${1 + fadeT * 0.3})`;
+                    title.style.opacity = String(clamp01(1 - fadeT * 2));
+                }
+            }
+
+            // Paper sheets: fly in over first 0.8vh of scroll
+            const sheetProgress = clamp01(scrollY / (vh * 0.8));
+
+            paperSheets.forEach((el) => {
+                const sx = parseFloat(el.dataset.sx!);
+                const sy = parseFloat(el.dataset.sy!);
+                const ex = parseFloat(el.dataset.ex!);
+                const ey = parseFloat(el.dataset.ey!);
+                const rot = parseFloat(el.dataset.rot!);
+                const delay = parseFloat(el.dataset.delay!);
+
+                // Each sheet has its own staggered timing
+                const t = easeOutCubic(
+                    clamp01((sheetProgress - delay) / (1 - delay)),
+                );
+
+                const x = lerp(sx, ex, t);
+                const y = lerp(sy, ey, t);
+                const r = lerp(rot + 15, rot, t); // extra rotation at start
+
+                el.style.transform = `translate(${x}vw, ${y}vh) rotate(${r}deg)`;
+            });
+
+            // Once sheets fully cover, hide paper container and set body to cream
+            if (sheetProgress >= 1) {
+                if (paperContainer) paperContainer.style.display = "none";
+                body.style.background = "#fafaf9";
+            } else {
+                if (paperContainer) paperContainer.style.display = "";
+                body.style.background = "#dc2626";
+            }
+        }
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+    </script>
+</Layout>
