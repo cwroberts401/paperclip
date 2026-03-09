@@ -204,7 +204,7 @@ export default function ProductConfig() {
           onClick={handleAdd}
           class="col-span-4 aspect-[4/1] rounded-xl text-white font-semibold text-base transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-3"
           style={{
-            background: added.value ? "#16a34a" : "#2563EB",
+            background: added.value ? "#16a34a" : "#dc2626",
             fontFamily: "Space Grotesk, sans-serif",
           }}
         >

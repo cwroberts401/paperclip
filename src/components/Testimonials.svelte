@@ -35,7 +35,7 @@
 
 <section class="py-20">
   <div class="px-6">
-    <h2 class="font-heading text-2xl font-bold text-center mb-2">Reviews</h2>
+    <h2 class="font-impact text-2xl font-bold text-center mb-2">Reviews</h2>
     <p class="text-sm text-text-secondary text-center italic mb-10">
       Real people. Real paperclips. Real satisfaction.
     </p>
@@ -48,12 +48,12 @@
     style="-webkit-overflow-scrolling: touch; scrollbar-width: none;"
   >
     {#each reviews as review, i}
-      <div class="snap-center shrink-0 w-[260px] bg-surface rounded-2xl p-6 flex flex-col">
-        <div class="text-accent-secondary mb-3 text-sm tracking-wider">
+      <div class="snap-center shrink-0 w-[260px] bg-black text-white rounded-2xl p-6 flex flex-col">
+        <div class="text-red-500 mb-3 text-sm tracking-wider">
           {'★'.repeat(review.stars)}{'☆'.repeat(5 - review.stars)}
         </div>
         <p class="text-sm leading-relaxed flex-1 mb-4">"{review.text}"</p>
-        <p class="text-xs text-text-secondary">— {review.author}</p>
+        <p class="text-xs text-stone-400">— {review.author}</p>
       </div>
     {/each}
   </div>
@@ -62,7 +62,7 @@
     {#each reviews as _, i}
       <div
         class="w-2 h-2 rounded-full transition-all duration-300"
-        style="background: {i === activeIndex ? '#2563EB' : '#d6d3d1'}"
+        style="background: {i === activeIndex ? '#dc2626' : '#d6d3d1'}"
       ></div>
     {/each}
   </div>

@@ -21,7 +21,7 @@ const invertedRows = [1, 2]; // indexes where false = good
 
 <section class="py-20 px-6">
   <div class="text-center mb-10">
-    <h2 class="font-heading text-2xl font-bold mb-2">The Competition</h2>
+    <h2 class="font-impact text-2xl font-bold mb-2">The Competition</h2>
     <p class="text-sm text-text-secondary italic">Spoiler: there isn't any.</p>
   </div>
 
@@ -44,7 +44,7 @@ const invertedRows = [1, 2]; // indexes where false = good
         {categories.map((cat, rowIndex) => (
           <tr class:list={[
             'border-t border-stone-200',
-            rowIndex >= 4 ? 'bg-accent/5' : ''
+            rowIndex >= 4 ? 'bg-red-50' : ''
           ]}>
             <td class="py-3 pr-2 text-text-secondary font-medium">{cat}</td>
             {products.map((p) => {

@@ -1,17 +1,25 @@
 ---
 ---
 
-<canvas id="scene-canvas"></canvas>
+<div id="scene-wrap">
+  <canvas id="scene-canvas"></canvas>
+</div>
 
 <style>
-  #scene-canvas {
+  #scene-wrap {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     z-index: 1;
     pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  #scene-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
   }
 </style>
 

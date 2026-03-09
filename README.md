@@ -1,4 +1,12 @@
-# Astro Starter Kit: Minimal
+# ECOMM PDP PAGE created with Astro Starter Kit: Minimal
+
+to run locally, clone and run:
+```sh
+npm i
+npm run dev
+```
+this project was created using Astro, Svelte, Tailwind, and Preact (signals and hooks)
+
 
 ```sh
 npm create astro@latest -- --template minimal

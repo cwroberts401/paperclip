@@ -1,0 +1,215 @@
+<section class="facts-section" data-facts-section>
+    <!-- Block 1: HOLDS / 50 / SHEETS + paper lines -->
+    <div class="fact-block reveal-text">
+        <span class="fit-text" data-fit="width:100%">Holds</span>
+        <span class="fit-text" data-count-to="50" data-fit="width:100%">0</span>
+        <span class="fit-text" data-fit="width:100%">Sheets</span>
+    </div>
+
+    <!-- Block 2: 304 / STAINLESS / STEEL -->
+    <div class="fact-block reveal-text">
+        <span class="fit-text steel" data-count-to="304" data-fit="width:100%"
+            >0</span
+        >
+        <span class="fit-text steel" data-fit="width:100%">Stainless</span>
+        <span class="fit-text steel" data-fit="width:100%">Steel</span>
+    </div>
+
+    <!-- Block 3: ∞ / REUSABLE -->
+    <div class="fact-block reveal-text">
+        <span class="fit-text" data-fit="width:100%">Infinitely</span>
+        <span class="fit-text" data-fit="width:100%">Reusable</span>
+    </div>
+
+    <!-- Block 4: 100% / RECYCLABLE -->
+    <div class="fact-block reveal-text">
+        <span
+            class="fit-text green"
+            data-count-to="100"
+            data-fit="width:100%"
+            data-suffix="%">0%</span
+        >
+        <span class="fit-text green" data-fit="width:100%">Recyclable</span>
+    </div>
+
+    <!-- Block 5: 0 / BATTERIES / REQUIRED -->
+    <div class="fact-block reveal-text">
+        <span class="fit-text" data-fit="width:100%">NO</span>
+        <span class="fit-text strikethrough" data-fit="width:100%"
+            >Batteries</span
+        >
+        <span class="fit-text strikethrough" data-fit="width:100%"
+            >Required</span
+        >
+    </div>
+</section>
+
+<style>
+    .facts-section {
+        padding: 4rem 1.5rem;
+        margin: 0 25%;
+        max-width: 40rem;
+        overflow: hidden;
+    }
+
+    .fact-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+    }
+
+    .fit-text {
+        font-family: Impact, "Arial Black", "Helvetica Neue", sans-serif;
+        font-weight: 900;
+        line-height: 0.9;
+        display: block;
+        white-space: nowrap;
+        color: transparent;
+        -webkit-text-stroke: 2px #1c1917;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .fit-text.red {
+        -webkit-text-stroke-color: #dc2626;
+    }
+
+    .fit-text.steel {
+        color: #9ca3af;
+        -webkit-text-stroke-color: transparent;
+    }
+
+    .fit-text.green {
+        color: #0fae47;
+        -webkit-text-stroke-color: transparent;
+    }
+
+    .fit-text.strikethrough {
+        text-decoration: line-through;
+        text-decoration-thickness: 3px;
+    }
+
+    /* Paper stack */
+    .paper-stack {
+        width: 80%;
+        margin: 0.75rem auto 0;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 3px;
+    }
+
+    .paper-line {
+        height: 3px;
+        background: #a8a29e;
+        border-radius: 1px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+</style>
+
+<script>
+    function fitText(el: HTMLElement, targetWidth: number) {
+        el.style.fontSize = "10px";
+        el.style.position = "absolute";
+        el.style.whiteSpace = "nowrap";
+        el.style.visibility = "hidden";
+        el.style.width = "auto";
+        const naturalWidth = el.getBoundingClientRect().width;
+        if (naturalWidth <= 0) {
+            el.style.position = "";
+            el.style.visibility = "";
+            return;
+        }
+        const scale = targetWidth / naturalWidth;
+        el.style.fontSize = `${10 * scale}px`;
+        el.style.position = "";
+        el.style.visibility = "";
+    }
+
+    function layoutFittedText() {
+        const section = document.querySelector<HTMLElement>(
+            "[data-facts-section]",
+        );
+        if (!section) return;
+        const sectionWidth = section.clientWidth;
+
+        const elements = section.querySelectorAll<HTMLElement>("[data-fit]");
+        elements.forEach((el) => {
+            const spec = el.dataset.fit!;
+            const match = spec.match(/width:(\d+)%/);
+            if (!match) return;
+            const pct = parseInt(match[1], 10) / 100;
+
+            // For counters, measure using final value so font size is stable
+            const countTo = el.dataset.countTo;
+            const suffix = el.dataset.suffix || "";
+            let original = "";
+            if (countTo) {
+                original = el.textContent || "";
+                el.textContent = countTo + suffix;
+            }
+
+            fitText(el, sectionWidth * pct);
+
+            // Restore the current display value
+            if (countTo && original) {
+                el.textContent = original;
+            }
+        });
+    }
+
+    function animateCounters() {
+        const counters =
+            document.querySelectorAll<HTMLElement>("[data-count-to]");
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    const el = entry.target as HTMLElement;
+                    const target = parseInt(el.dataset.countTo!, 10);
+                    if (el.dataset.animated) return;
+                    el.dataset.animated = "1";
+                    observer.unobserve(el);
+
+                    const suffix = el.dataset.suffix || "";
+                    const duration = 1500;
+                    const start = performance.now();
+
+                    // Font size is already set by layoutFittedText for the final value.
+                    // Lock it so it doesn't jump during counting.
+                    const lockedFontSize = el.style.fontSize;
+
+                    function tick(now: number) {
+                        const elapsed = now - start;
+                        const t = Math.min(elapsed / duration, 1);
+                        const eased = 1 - Math.pow(1 - t, 3);
+                        el.textContent =
+                            String(Math.round(eased * target)) + suffix;
+                        el.style.fontSize = lockedFontSize;
+                        if (t < 1) requestAnimationFrame(tick);
+                    }
+
+                    requestAnimationFrame(tick);
+                });
+            },
+            { threshold: 0.3 },
+        );
+
+        counters.forEach((el) => observer.observe(el));
+    }
+
+    function init() {
+        layoutFittedText();
+        animateCounters();
+    }
+
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(layoutFittedText, 150);
+    });
+
+    init();
+</script>
