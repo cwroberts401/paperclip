@@ -7,6 +7,15 @@ npm run dev
 ```
 this project was created using Astro, Svelte, Tailwind, and Preact (signals and hooks)
 
+## Design Choices
+-------------------
+
+This project uses 3d visuals to create a sleek identity for an average product.It's targeted at a user who already knows what the product is but maybe hasn't considered its other uses. The 3d flow begins simpily then we move into different uses for Paperclips and finally transition the camera angle to show the chosen color and quantity. After the visuals we then strengthen trust signals by showing reviews and a comparison chart along with technical details for detail oriented buyers. The CTA's stay fixed for most of the user journey to ensure they don't miss the call to action.
+
+
+
+-------------------
+
 
 ```sh
 npm create astro@latest -- --template minimal
